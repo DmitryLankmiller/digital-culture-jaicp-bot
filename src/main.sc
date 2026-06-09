@@ -2,20 +2,28 @@ theme: /
 
     state: Start
         q!: $regex</start>
-        a: Здравствуйте! Я могу рассказать о погоде и курсах валют.
+        a: Напишите: дата или день недели.
 
-    state: hello
-        q!: $regex<.*(привет|здравствуй|здравствуйте|добрый день|доброе утро|добрый вечер|hello|hi|хай|начать|старт).*>
-        a: Здравствуйте! Я могу рассказать о погоде и курсах валют.
+    state: Date
+        q!: $regex<.*(дата|число|сегодня|какое сегодня число|текущая дата|current date|date).*>
+        script:
+            var now = new Date();
+            var day = now.getUTCDate();
+            var month = now.getUTCMonth() + 1;
+            var year = now.getUTCFullYear();
+            var dd = day < 10 ? "0" + day : "" + day;
+            var mm = month < 10 ? "0" + month : "" + month;
+            $session.dateAnswer = dd + "." + mm + "." + year;
+        a: {{$session.dateAnswer}}
 
-    state: weather
-        q!: $regex<.*(погода|прогноз|температура|дождь|снег|ветер|что с погодой|какая погода|погода сегодня).*>
-        a: Сейчас я могу сообщить общий прогноз. Уточните город, чтобы посмотреть актуальную погоду.
-
-    state: currency
-        q!: $regex<.*(курс валют|валюта|курс доллара|курс евро|доллар|евро|usd|eur|обменный курс|сколько стоит доллар|сколько стоит евро).*>
-        a: Курсы валют меняются в течение дня. Уточните валюту: доллар или евро.
+    state: Week Day
+        q!: $regex<.*(день недели|какой день недели|сегодня день|weekday|week day|day of week).*>
+        script:
+            var now = new Date();
+            var days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+            $session.weekDayAnswer = days[now.getUTCDay()];
+        a: {{$session.weekDayAnswer}}
 
     state: NoMatch
         event!: noMatch
-        a: Я не понял запрос. Напишите: погода, курс валют или привет.
+        a: Я не понял запрос.
